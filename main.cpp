@@ -3,12 +3,33 @@
 #include <iostream>
 #include "fitsio.h"
 #include <stdlib.h>
+#include "manage.h"
 
 using namespace std;
 
 int main(int argc, char *argv[]){   
+
+    string *path;
+    path = (string*)malloc(120);  
+    *path = "/Users/oliveira/MakeImage/SPLUS-cuts/SPLUS-s24s32-48.753343--30.708032-300";
+
+    files *newfile;
+    newfile = (files*)malloc(1024);   
+
+    string *append_path; append_path = (string*)malloc(120);  
+    
+    for(int i = 0; i < 12; i++){
+        *append_path = *path + "_" + bands[i] + ".fits.fz";
+
+        newfile -> band[i] = bands[i];
+        newfile -> filename[i] = *append_path;
+
+        cout << newfile -> filename[i] << " " << newfile -> band[i] << endl;
+    }
+
+
     fitsfile *fptr;   /* FITS file pointer, defined in fitsio.h */
-    fptr = (fitsfile*)malloc(100000);
+   
     int hdunums = 0;
     int status = 0;   /* CFITSIO status value MUST be initialized to zero! */
 
@@ -18,13 +39,13 @@ int main(int argc, char *argv[]){
     char format[20], hdformat[20];
 
 
-    if (!fits_open_file(&fptr, "/home/gustavo/Documents/MakeImage/STRIPE82-0003_R_swp.fz", READONLY, &status))
-    
+    //if (!fits_open_file(&fptr, "/home/gustavo/Documents/MakeImage/STRIPE82-0003_R_swp.fz", READONLY, &status))
+    if (!fits_open_file(&fptr, "/Users/oliveira/MakeImage/SPLUS-cuts/SPLUS-s24s32-48.753343--30.708032-300_R.fits.fz", READONLY, &status))
         fits_get_num_hdus(fptr, &hdunums, &status);
         cout << "number of HDUs:";cout << hdunums << endl;
 
         //current HDU
-        int currhdu = 0;
+        int currhdu;
         fits_get_hdu_num(fptr, &currhdu);
         cout << "Current HDU:";cout << currhdu <<endl;
 
@@ -61,8 +82,8 @@ int main(int argc, char *argv[]){
 
             printf("\n      ");          /* print column header */
             for (ii = 1; ii <= naxes[0]; ii++)
-               printf(hdformat, ii);
-            printf("\n");                /* terminate header line */
+            //    printf(hdformat, ii);
+            // printf("\n");                /* terminate header line */
 
             /* loop over all the rows in the image, top to bottom */
             for (fpixel[1] = naxes[1]; fpixel[1] >= 1; fpixel[1]--)
@@ -75,9 +96,7 @@ int main(int argc, char *argv[]){
             //    for (ii = 0; ii < naxes[0]; ii++)
             //       printf(format, pixels[ii]);   /* print each value  */
             //    printf("\n");                    /* terminate line */
-                for (ii = 0; ii < naxes[0]; ii++)
-                    printf(format, pixels[ii]); 
-                printf("\n");     
+
             }
             free(pixels);
           }
