@@ -8,11 +8,13 @@ std::string bands[12] = { "R", "G", "I", "U", "Z", "F378", "F395", "F410", "F430
 struct files{
     std::string filename[12];
     std::string band[12];
-    double image_array[0][0]; 
+    fitsfile *fits;
+    int naxes0;
+    int naxes1;
 };
 
-double open_file(string path){
-    cout << "\n" << path << endl;
+double open_file(string path, files newfile){
+
     char *cstr = new char[path.length() + 1];
     strcpy(cstr, path.c_str());
 
@@ -29,21 +31,16 @@ double open_file(string path){
     //if (!fits_open_file(&fptr, "/home/gustavo/Documents/MakeImage/STRIPE82-0003_R_swp.fz", READONLY, &status))
     if (!fits_open_file(&fptr, cstr, READONLY, &status))
         fits_get_num_hdus(fptr, &hdunums, &status);
-        cout << "number of HDUs:";cout << hdunums << endl;
-
-        //current HDU
         int currhdu;
         fits_get_hdu_num(fptr, &currhdu);
-        cout << "Current HDU:";cout << currhdu <<endl;
 
-        //Go to different HDU
-        int *hdutype = NULL;
-        int nmove = 1;
-        fits_movrel_hdu(fptr, nmove, hdutype, &status);
-
-        fits_get_hdu_num(fptr, &currhdu);
-        cout << "Current HDU:";cout << currhdu <<endl;
-
+        if (hdunums == 2 & currhdu == 1){
+            int *hdutype = NULL;
+            int nmove = 1;
+            fits_movrel_hdu(fptr, nmove, hdutype, &status);
+            fits_get_hdu_num(fptr, &currhdu);
+        }
+        
     {
         if (!fits_get_img_param(fptr, 2, &bitpix, &naxis, naxes, &status) )
         {
@@ -66,13 +63,9 @@ double open_file(string path){
                strcpy(hdformat, " %15d");
                strcpy(format,   " %15.5f");
             }
+            
+            double count;
 
-            printf("\n      ");          /* print column header */
-            for (ii = 1; ii <= naxes[0]; ii++)
-            //    printf(hdformat, ii);
-            // printf("\n");                /* terminate header line */
-
-            /* loop over all the rows in the image, top to bottom */
             for (fpixel[1] = naxes[1]; fpixel[1] >= 1; fpixel[1]--)
             {
                if (fits_read_pix(fptr, TDOUBLE, fpixel, naxes[0], NULL,
@@ -80,11 +73,13 @@ double open_file(string path){
                   break;  /* jump out of loop on error */
 
                  /* print row number */
-            //    for (ii = 0; ii < naxes[0]; ii++)
-            //       printf(format, pixels[ii]);   /* print each value  */
+               for (ii = 0; ii < naxes[0]; ii++)
+                  count = count + pixels[ii];
+                //   printf(format, pixels[ii]);   /* each value  */
             //    printf("\n");                    /* terminate line */
 
             }
+            cout << count << endl;
             free(pixels);
           }
         }
