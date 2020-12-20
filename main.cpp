@@ -6,6 +6,7 @@
 #include <vector> 
 
 #include "manage.h"
+#include "open_files.h"
 
 using namespace std;
 
@@ -31,15 +32,9 @@ int main(int argc, char *argv[]){
         newfile -> filename[i] = *append_path;
 
         cout << newfile -> filename[i] << " " << newfile -> band[i] << endl;
-
-        char *cstr = new char[newfile -> filename[i].length() + 1];
-        strcpy(cstr, newfile -> filename[i].c_str());
-
-        fits_open_file(&fptr, cstr, READONLY, &status);
-        newfile -> fits[i] = *fptr;
     }
 
-    open_file(newfile -> filename[1], *newfile);
+    open_files(newfile -> filename[1], *newfile);
 
     return 0;
 }
